@@ -1,0 +1,5 @@
+Respuesta #1 | Fecha y Hora: 2024-11-07 15:34:12 | IP: 127.0.0.1 | Respuesta: Pacifico
+Respuesta #2 | Fecha y Hora: 2024-11-07 15:34:45 | IP: 127.0.0.1 | Respuesta: Naranja
+Respuesta #3 | Fecha y Hora: 2024-11-07 15:34:49 | IP: 127.0.0.1 | Respuesta: Canguro
+Respuesta #4 | Fecha y Hora: 2024-11-07 15:34:53 | IP: 127.0.0.1 | Respuesta: Oxigeno
+Respuesta #5 | Fecha y Hora: 2024-11-07 15:34:56 | IP: 127.0.0.1 | Respuesta: 1945

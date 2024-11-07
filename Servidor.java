@@ -1,6 +1,3 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -9,7 +6,7 @@ import java.util.Map;
 
 public class Servidor {
     private static final int PUERTO = 1234;
-    private static final Preguntas[] PREGUNTAS = {
+    public static final Preguntas[] PREGUNTAS = {
         new Preguntas("¿Cuál es el océano más grande?", "pacifico"),
         new Preguntas("¿Qué fruta es conocida por tener vitamina C?", "naranja"),
         new Preguntas("¿Qué animal es el símbolo de Australia?", "canguro"),
@@ -19,7 +16,6 @@ public class Servidor {
 
     private static Map<String, Integer> progresoClientes = new HashMap<>();
     private static Map<String, Integer> puntuacionClientes = new HashMap<>();
-
     private static int contadorRespuestas = 1;
 
     public static void main(String[] args) {
@@ -31,54 +27,31 @@ public class Servidor {
                 DatagramPacket paqueteEntrada = new DatagramPacket(bufferEntrada, bufferEntrada.length);
                 socket.receive(paqueteEntrada);
 
-                String mensajeRecibido = new String(paqueteEntrada.getData(), 0, paqueteEntrada.getLength()).trim();
-                InetAddress direccionCliente = paqueteEntrada.getAddress();
-                int puertoCliente = paqueteEntrada.getPort();
-                String idCliente = direccionCliente.toString() + ":" + puertoCliente;
-
-                int numeroDePregunta = progresoClientes.getOrDefault(idCliente, 0);
-                int total = puntuacionClientes.getOrDefault(idCliente, 0);
-
-                if (numeroDePregunta > 0) {
-                    Preguntas preguntaActual = PREGUNTAS[numeroDePregunta - 1];
-                    boolean correcto = preguntaActual.verificarRespuesta(mensajeRecibido);
-                    if (correcto) total++;
-                    puntuacionClientes.put(idCliente, total);
-
-                    registrarRespuesta(mensajeRecibido, direccionCliente.getHostAddress());
-                }
-
-                String mensajeRespuesta;
-                if (numeroDePregunta == PREGUNTAS.length) {
-                    mensajeRespuesta = "Finalizó la encuesta, tu puntuación es: " + total * 4 + "/20";
-                    progresoClientes.remove(idCliente);
-                    puntuacionClientes.remove(idCliente);
-                } else {
-                    Preguntas preguntaActual = PREGUNTAS[numeroDePregunta];
-                    mensajeRespuesta = (numeroDePregunta > 0 ? 
-                        "Respuesta " + (PREGUNTAS[numeroDePregunta - 1].verificarRespuesta(mensajeRecibido) ? "Correcta. " : "Incorrecta. La respuesta es: " + PREGUNTAS[numeroDePregunta - 1].getRespuestaCorrecta()) 
-                        : "")
-                        + "\nPregunta: " + preguntaActual.getPregunta();
-                    progresoClientes.put(idCliente, numeroDePregunta + 1);
-                }
-
-                byte[] bufferSalida = mensajeRespuesta.getBytes();
-                DatagramPacket paqueteSalida = new DatagramPacket(bufferSalida, bufferSalida.length, direccionCliente, puertoCliente);
-                socket.send(paqueteSalida);
+                // Al recibir un paquete, se maneja la conexión del cliente en un hilo independiente
+                new Thread(new ClienteHandler(socket, paqueteEntrada)).start();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void registrarRespuesta(String respuesta, String ip) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("respuestas.txt", true))) {
-            String fechaHora = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String entrada = String.format("Respuesta #%d | Fecha y Hora: %s | IP: %s | Respuesta: %s",
-                                            contadorRespuestas++, fechaHora, ip, respuesta);
-            writer.println(entrada);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    // Getter para progresoClientes
+    public static Map<String, Integer> getProgresoClientes() {
+        return progresoClientes;
+    }
+
+    // Getter para puntuacionClientes
+    public static Map<String, Integer> getPuntuacionClientes() {
+        return puntuacionClientes;
+    }
+
+    // Getter para contadorRespuestas
+    public static int getContadorRespuestas() {
+        return contadorRespuestas;
+    }
+
+    // Incrementar contadorRespuestas
+    public static void incrementarContadorRespuestas() {
+        contadorRespuestas++;
     }
 }

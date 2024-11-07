@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Scanner;
 
 public class Cliente {
-    private static final String HOST_SERVIDOR = "172.29.39.231";
+    private static final String HOST_SERVIDOR = "localhost";
     private static final int PUERTO_SERVIDOR = 1234;
 
     public static void main(String[] args) {
